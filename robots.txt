@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /_source/
+Disallow: /_data/
+
+Sitemap: https://vsschool.com.ua/sitemap.xml

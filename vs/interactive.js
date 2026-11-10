@@ -1,0 +1,186 @@
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  /* ---------- Плавна прокрутка ---------- */
+  var lenis = window.VS_LENIS || null;
+  if (lenis) {
+    if (document.body.classList.contains('is-loading')) {
+      lenis.stop();
+      setTimeout(function () { lenis.start(); }, (window.VS_INTRO_MS || 0) + 50);
+    }
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      var id = a.getAttribute('href');
+      var el = id === '#top' ? 0 : document.querySelector(id);
+      if (el === null) return;
+      e.preventDefault();
+      lenis.scrollTo(el, { offset: id === '#top' ? 0 : -76, duration: 1.4 });
+    });
+  }
+
+  /* ---------- Заголовки розкриваються по словах ---------- */
+  window.VS_SPLIT = !reduce;
+  if (window.VS_SPLIT) {
+    var heads = document.querySelectorAll('main h2');
+    heads.forEach(function (h) {
+      (function walk(node) {
+        Array.prototype.slice.call(node.childNodes).forEach(function (n) {
+          if (n.nodeType === 3) {
+            var frag = document.createDocumentFragment();
+            n.textContent.split(/(\s+)/).forEach(function (part) {
+              if (!part) return;
+              if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+              var w = document.createElement('span'); w.className = 'sw';
+              var i = document.createElement('i'); i.textContent = part; w.appendChild(i);
+              frag.appendChild(w);
+            });
+            node.replaceChild(frag, n);
+          } else if (n.nodeType === 1 && n.tagName !== 'BR') walk(n);
+        });
+      })(h);
+      h.querySelectorAll('.sw > i').forEach(function (i, k) { i.style.transitionDelay = (k * 60) + 'ms'; });
+    });
+    if ('IntersectionObserver' in window) {
+      var hio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('split-in'); hio.unobserve(e.target); } });
+      }, { threshold: 0.3, rootMargin: '0px 0px -8% 0px' });
+      heads.forEach(function (h) { hio.observe(h); });
+    } else heads.forEach(function (h) { h.classList.add('split-in'); });
+  }
+
+  /* ---------- Рівні навчання ---------- */
+  var hs = document.querySelector('.hscroll');
+  var track = hs && hs.querySelector('.hs-track');
+  var vp = hs && hs.querySelector('.hs-viewport');
+  var dist = 0, scale = 1, lastW = 0, lastH = 0, rt = 0;
+  window.VS_PIN = false;
+  function hdrH() { var h = document.getElementById('hdr'); return h ? h.offsetHeight : 0; }
+  var sticky = hs && hs.querySelector('.hs-sticky');
+  var head = sticky && sticky.querySelector('.wrap');
+  function headOut(out) {
+    if (!head) return;
+    if (out && head.parentNode === sticky) { hs.insertBefore(head, sticky); hs.classList.add('pin-compact'); }
+    if (!out && head.parentNode !== sticky) { sticky.insertBefore(head, sticky.firstChild); hs.classList.remove('pin-compact'); }
+  }
+  function headH() { return head && head.parentNode !== sticky ? head.offsetHeight : 0; }
+  function setupPin() {
+    if (!hs) return;
+    var on = !reduce && window.innerHeight >= 500;
+    hs.classList.toggle('pinned', on);
+    headOut(false);
+    if (on && sticky.scrollHeight > sticky.clientHeight + 2) headOut(true);
+    window.VS_PIN = on;
+    if (!on) { hs.style.height = ''; track.style.transform = ''; track.style.marginBottom = ''; return; }
+    track.style.transform = ''; track.style.marginBottom = '';
+    var sp = getComputedStyle(sticky), free = sticky.clientHeight - parseFloat(sp.paddingTop) - parseFloat(sp.paddingBottom) - (head && head.parentNode === sticky ? head.offsetHeight : 0);
+    var th = track.offsetHeight;
+    scale = (th > free && free > 200) ? Math.max(0.55, free / th) : 1;
+    if (scale < 1) track.style.marginBottom = (-(1 - scale) * th).toFixed(1) + 'px';
+    var cs = getComputedStyle(vp);
+    var pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    dist = Math.max(0, track.scrollWidth * scale + pad - vp.clientWidth);
+    hs.style.height = (headH() + sticky.offsetHeight + dist) + 'px';
+    lastW = window.innerWidth; lastH = window.innerHeight;
+    movePin();
+    if (window.VS_LENIS) window.VS_LENIS.resize();
+  }
+  var ticking = false;
+  function movePin() {
+    if (!window.VS_PIN) return;
+    var top = hs.getBoundingClientRect().top + headH() - hdrH();
+    var p = Math.min(1, Math.max(0, -top / (dist || 1)));
+    track.style.transform = 'translate3d(' + (-p * dist).toFixed(1) + 'px,0,0)' + (scale < 1 ? ' scale(' + scale.toFixed(3) + ')' : '');
+  }
+  function onScroll() {
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(function () { ticking = false; movePin(); });
+  }
+  setupPin();
+  window.addEventListener('resize', function () {
+    var dh = Math.abs(window.innerHeight - lastH);
+    if (window.innerWidth === lastW && (fine ? dh < 2 : dh < 120)) return;
+    clearTimeout(rt); rt = setTimeout(setupPin, 150);
+  });
+  window.addEventListener('orientationchange', function () { setTimeout(setupPin, 300); });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('load', setupPin);
+
+  /* ---------- Кроки вступу ---------- */
+  document.querySelectorAll('.step').forEach(function (s, i) { s.style.setProperty('--i', i); });
+
+  /* ---------- Фотогалерея з переглядом ---------- */
+  var items = Array.prototype.slice.call(document.querySelectorAll('.m-item'));
+  var lb = document.getElementById('lightbox');
+  var lbImg = lb && lb.querySelector('img');
+  var cur = 0;
+  items.forEach(function (b) {
+    var img = b.querySelector('img');
+    img.addEventListener('error', function () { b.remove(); items = items.filter(function (x) { return x !== b; }); });
+  });
+  function show(i) {
+    if (!items.length) return;
+    cur = (i + items.length) % items.length;
+    lbImg.src = items[cur].dataset.src;
+    lbImg.alt = items[cur].querySelector('img').alt;
+  }
+  var lbLast = null, lbKbd = false;
+  function openLb(i, from, kb) { show(i); lbLast = from || null; lbKbd = !!kb; lb.hidden = false; if (lenis) lenis.stop(); if (lbKbd) lb.querySelector('.lb-close').focus(); }
+  function closeLb() { lb.hidden = true; if (lenis) lenis.start(); if (lbLast && lbKbd) lbLast.focus({ preventScroll: true }); else if (document.activeElement) document.activeElement.blur(); }
+  if (lb) {
+    document.getElementById('mosaic').addEventListener('click', function (e) {
+      var b = e.target.closest('.m-item'); if (b) openLb(items.indexOf(b), b, e.detail === 0);
+    });
+    lb.querySelector('.lb-close').addEventListener('click', closeLb);
+    lb.querySelector('.lb-prev').addEventListener('click', function (e) { show(cur - 1); if (e.detail) this.blur(); });
+    lb.querySelector('.lb-next').addEventListener('click', function (e) { show(cur + 1); if (e.detail) this.blur(); });
+    lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
+    document.addEventListener('keydown', function (e) {
+      if (lb.hidden) return;
+      if (e.key === 'Escape') closeLb();
+      if (e.key === 'ArrowLeft') show(cur - 1);
+      if (e.key === 'ArrowRight') show(cur + 1);
+    });
+  }
+
+  /* ---------- Покрокова форма ---------- */
+  var sel = document.getElementById('f-grade');
+  var choices = document.getElementById('f-choices');
+  var s1 = document.getElementById('f-step1'), s2 = document.getElementById('f-step2');
+  var marks = document.querySelectorAll('.f-steps span');
+  function pick(val) {
+    sel.value = val;
+    choices.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === val)); });
+  }
+  function go(step) {
+    s1.hidden = step !== 1; s2.hidden = step !== 2;
+    marks[0].classList.toggle('on', step === 1); marks[1].classList.toggle('on', step === 2);
+    if (step === 2) document.getElementById('f-name').focus();
+  }
+  if (sel && choices) {
+    Array.prototype.forEach.call(sel.options, function (o) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = o.text; b.dataset.v = o.value || o.text;
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', function () { pick(b.dataset.v); });
+      choices.appendChild(b);
+    });
+    pick(sel.value);
+    document.getElementById('f-next').addEventListener('click', function () { go(2); });
+    document.getElementById('f-back').addEventListener('click', function () { go(1); });
+    document.querySelectorAll('[data-grade]').forEach(function (a) {
+      a.addEventListener('click', function () { pick(a.dataset.grade); go(1); });
+    });
+  }
+
+  /* ---------- «Магнітні» кнопки ---------- */
+  if (fine && !reduce) {
+    document.querySelectorAll('.pill').forEach(function (p) {
+      p.addEventListener('mousemove', function (e) {
+        var r = p.getBoundingClientRect();
+        var dx = (e.clientX - r.left - r.width / 2) * 0.18, dy = (e.clientY - r.top - r.height / 2) * 0.3;
+        p.style.translate = dx.toFixed(1) + 'px ' + dy.toFixed(1) + 'px';
+      });
+      p.addEventListener('mouseleave', function () { p.style.translate = ''; });
+    });
+  }
+})();
