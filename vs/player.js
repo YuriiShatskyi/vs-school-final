@@ -28,7 +28,7 @@
   var history = [], queue = [];
   var ctx = null, master = null;
 
-  var el1 = new Audio(); el1.preload = 'auto';
+  var el1 = new Audio(); el1.preload = 'metadata';
   var decks = [{ el: el0, fade: 0, anim: null, g: null }, { el: el1, fade: 0, anim: null, g: null }];
   var cur = 0;
   var active = function () { return decks[cur]; };

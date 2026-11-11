@@ -10,11 +10,8 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="images/logo/favicon-32.png">
 <link rel="apple-touch-icon" href="images/logo/apple-touch-icon.png">
-<link rel="stylesheet" href="vs/fonts/fonts.css">
-<link rel="stylesheet" href="vs/lib/aos.css">
-<link rel="stylesheet" href="vs/style.css?v=202611091949">
-<link rel="stylesheet" href="vs/effects.css?v=202611050900">
-<link rel="stylesheet" href="vs/interactive.css?v=202611101646">
+<link rel="preload" href="images/hero.webp" as="image" fetchpriority="high">
+<link rel="stylesheet" href="vs/site.css?v=202611110736">
 <link rel="stylesheet" href="vs/player.css?v=202611050900">
 </head>
 <body class="page-news">
@@ -60,7 +57,7 @@
 
 <!-- ===================== 404 ===================== -->
 <section class="hero hero-page">
-  <img src="images/hero.jpg" alt="" fetchpriority="high">
+  <img src="images/hero.webp" alt="" fetchpriority="high">
   <div class="wrap">
     <nav class="crumbs" aria-label="Навігація"><a href="index.html">Головна</a><span>/</span>404</nav>
     <h1>Сторінку не знайдено</h1>
@@ -124,13 +121,13 @@
   </div>
   <button type="button" class="pl-btn pl-listbtn" id="plListBtn" aria-label="Показати список пісень" aria-expanded="false" aria-controls="plPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11M4 12h11M4 17h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M18 9.5v8.2a1.8 1.8 0 1 1-1.2-1.7V9l3.7-1v1.6z" fill="currentColor"/></svg></button>
   <button type="button" class="pl-btn pl-min" id="plMin" aria-label="Згорнути плеєр" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-  <audio id="plAudio" preload="auto"></audio>
+  <audio id="plAudio" preload="metadata"></audio>
 </div>
 
 <script src="vs/lib/aos.js"></script>
-<script src="vs/content.js?v=202611091952"></script>
+<script src="vs/content.js?v=202611110736"></script>
 <script src="vs/lib/lenis.min.js"></script>
-<script src="vs/player.js?v=202611050900"></script>
+<script src="vs/player.js?v=202611110736"></script>
 <script src="vs/nav.js?v=202611091820"></script>
 <script src="vs/effects.js?v=202611091914"></script>
 <script src="vs/interactive.js?v=202611101708"></script>
