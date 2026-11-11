@@ -317,7 +317,7 @@
   paintTrack(); paintMode();
   if (shuffle) refillQueue();
   box.hidden = false;
-  var introMs = document.getElementById('intro') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 1500 : 0;
+  var introMs = document.getElementById('intro') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 900 : 0;
   if (introMs) { box.classList.add('hide-intro'); setTimeout(function () { box.classList.remove('hide-intro'); }, introMs + 300); }
   if (!userPaused) resume(false);
 })();

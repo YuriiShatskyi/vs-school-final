@@ -10,12 +10,12 @@
     if (intro) intro.classList.add('gone');
     body.classList.remove('is-loading');
   } else {
-    window.VS_INTRO_MS = 1500;
+    window.VS_INTRO_MS = 900;
     setTimeout(function () {
       intro.classList.add('out');
       body.classList.remove('is-loading');
-      setTimeout(function () { intro.classList.add('gone'); }, 950);
-    }, 1400);
+      setTimeout(function () { intro.classList.add('gone'); }, 750);
+    }, 800);
   }
 
   /* ---------- Слайдер новин ---------- */

@@ -1,7 +1,7 @@
-.intro{position:fixed;inset:0;z-index:100;background:var(--dark);display:grid;place-items:center;align-content:center;gap:28px;transition:transform .9s cubic-bezier(.7,0,.2,1)}
-.intro img{height:clamp(120px,18vw,180px);width:auto;animation:intro-logo 1s cubic-bezier(.2,.7,.2,1) both}
+.intro{position:fixed;inset:0;z-index:100;background:var(--dark);display:grid;place-items:center;align-content:center;gap:28px;transition:transform .7s cubic-bezier(.7,0,.2,1)}
+.intro img{height:clamp(120px,18vw,180px);width:auto;animation:intro-logo .6s cubic-bezier(.2,.7,.2,1) both}
 .intro-bar{display:block;width:min(240px,60vw);height:6px;background:rgba(244,241,234,.12);overflow:hidden}
-.intro-bar i{display:block;height:100%;width:100%;background:var(--stripes);transform-origin:left;animation:intro-bar 1.1s cubic-bezier(.4,0,.2,1) .2s both}
+.intro-bar i{display:block;height:100%;width:100%;background:var(--stripes);transform-origin:left;animation:intro-bar .65s cubic-bezier(.4,0,.2,1) .1s both}
 @keyframes intro-logo{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
 @keyframes intro-bar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .intro.out{transform:translateY(-100%)}
